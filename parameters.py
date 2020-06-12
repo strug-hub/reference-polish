@@ -11,20 +11,22 @@ class Parameters:
         self.REF_REGION   =   None   
         self.DOWNSAMPLE = 1
 
-def get_parameters(CFID="CF002"):
+def get_parameters():
     """Parses command line arguments and sets default parameters.
     Returns a Parameters object."""
 
     p = Parameters()
-    
-    p.ID = CFID
+
+    '''    
+    p.ID = "CF002"
     p.REF_FA =  "/media/scott/Zapdos/reference/hg38.fa"
     p.READS = "/media/scott/Zapdos/slc9a3_polish/" + CFID + "_slc9a3.bam"
     p.OUTPUT_DIR = "/media/scott/Zapdos/slc9a3_polish/out/" + CFID
 
     #p.REF_REGION = "chr5:393462-696129"
     p.REF_REGION = "chr5:393462-677667"
-
+    '''
+    
     parser = argparse.ArgumentParser(description="Reference sequence region polish")
 
     # Positional

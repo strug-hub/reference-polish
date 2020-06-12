@@ -1,23 +1,10 @@
 from pybedtools import BedTool
 import shutil
 import os
+import re
 import pickle as pkl
 import pandas as pd
-
-import csv
-csv.field_size_limit(999999999)
-
-def copy_file(file, newFile):
-    shutil.copyfile(file, newFile)
-    return newFile
-
-def move_file(file, newFile):
-    shutil.move(file, newFile)
-    return newFile
-
-def rename_file(file, newFile):
-    os.rename(file, newFile)
-    return newFile
+import pyfaidx
 
 def make_dir(directory):
     if not os.path.exists(directory):
@@ -42,6 +29,57 @@ def delete_file(file, deleteDirTree=False):
             os.rmdir(file)
         except:
             if deleteDirTree: shutil.rmtree(file)
+
+def rename_file(file, newFile):
+    os.rename(file, newFile)
+    return newFile
+
+
+def faidx_fetch(faFile, region):
+    fa = pyfaidx.Faidx(faFile)
+    return str(fa.fetch(region.chrom, region.start, region.end))
+
+
+def index_fasta(faFile):
+    faidx = pyfaidx.Faidx(faFile)
+    return faidx
+
+def write_fasta(faPath, fastaDict, toUpper=False, index=False):
+
+    if not faPath.endswith(".fa") and not faPath.endswith(".fasta"):
+        faPath = faPath + ".fasta"
+        
+    writer = open(faPath, "w+")
+
+    for fid in fastaDict:
+        writer.write(">" + fid + "\n" + \
+                 re.sub("(.{64})", "\\1\n", "".join(fastaDict[fid]), 0, re.DOTALL) + "\n")
+
+    writer.close()
+
+    if index: index_fasta(faPath)
+    return faPath
+
+
+
+
+
+
+
+import csv
+csv.field_size_limit(999999999)
+
+def copy_file(file, newFile):
+    shutil.copyfile(file, newFile)
+    return newFile
+
+def move_file(file, newFile):
+    shutil.move(file, newFile)
+    return newFile
+
+
+
+
 
 
 def parse_alignments(csv_file):

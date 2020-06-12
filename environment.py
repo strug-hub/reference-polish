@@ -1,0 +1,6 @@
+SAMTOOLS = "samtools"
+PBMM2 = "pbmm2"
+GENOMIC_CONSENSUS = "gcpp"
+LONGSHOT = "longshot"
+MM2 = "minimap2"
+PAFTOOLS = "paftools"
