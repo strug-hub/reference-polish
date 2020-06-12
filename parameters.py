@@ -11,7 +11,6 @@ class Parameters:
         self.REF_REGION   =   None   
         self.DOWNSAMPLE = 1
 
-
 def get_parameters(CFID="CF002"):
     """Parses command line arguments and sets default parameters.
     Returns a Parameters object."""
