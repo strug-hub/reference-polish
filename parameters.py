@@ -1,15 +1,17 @@
 import argparse
+import sys
 
 class Parameters:
     #default parameters established here
     def __init__(self):
         
-        self.ID = "_id_missing_"
-        self.OUTPUT_DIR   =   "./out"     #output directory
+        self.ID           =   "_id_missing_"
+        self.OUTPUT_DIR   =   "./out"
+        self.DOWNSAMPLE   =   1
+
         self.REF_FA       =   None
         self.READS        =   None   
         self.REF_REGION   =   None   
-        self.DOWNSAMPLE = 1
 
 def get_parameters():
     """Parses command line arguments and sets default parameters.
@@ -35,7 +37,7 @@ def get_parameters():
     
     parser.add_argument("reads", metavar="reads", default=p.READS, nargs="?",
                     help="Pacbio reads")
-    
+
     parser.add_argument("sampleId", metavar="id", default=p.ID, nargs="?",
              help="ID for sample")
 
@@ -57,7 +59,12 @@ def get_parameters():
     p.READS = args.reads
     p.ID = args.sampleId
     p.DOWNSAMPLE = args.downsample
-
     p.OUTPUT_DIR = args.outdir
+
+    required = [p.REF_FA, p.REF_REGION, p.READS, p.ID]
+    for arg in required:
+        if arg is None:
+            parser.print_help()
+            sys.exit()
     
     return p

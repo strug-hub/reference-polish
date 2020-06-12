@@ -1,7 +1,7 @@
 import re
 import parameters
 import file_handler as io
-import utils.external_tools as tools
+import external_tools as tools
 import region as rgn
 import helper
 
