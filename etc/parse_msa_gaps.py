@@ -2,28 +2,32 @@ import argparse
 import pandas as pd
 import re
 import os
+import sys
 
 def main():
     
     parser = argparse.ArgumentParser(description="Get repeat info from MSA")
 
     #Positional
-    parser.add_argument("msa", metavar="msaFile", default="/media/scott/Rotom/hybrid2/slc9a3/out/mafft.align", nargs="?",
+    parser.add_argument("msa", metavar="msaFile", nargs="?",
                         help="CLUSTAL format alignment file")
-    parser.add_argument("repeats", metavar="repeatsFile", default="/media/scott/Rotom/hybrid2/slc9a3/out/repeats.txt", nargs="?", 
+    parser.add_argument("repeats", metavar="repeatsFile", nargs="?", 
                     help="Tab-sep, 2 columns reference start/reference end positions; no header" )
-    
-    parser.add_argument("--out", type=str, default="/media/scott/Rotom/hybrid2/slc9a3/out/", nargs="?", 
+    parser.add_argument("--out", type=str, default="./out/", nargs="?", 
                 help="Output directory" )
 
     parser.add_argument("--refname", type=str, default="hg38", 
                     help="Reference name in MSA file")
     parser.add_argument("--start", type=int, default=0, 
-                    help="Reference position for the first base in the MSA file")
+                    help="Reference position for the first base in the MSA file (default=0)")
     parser.add_argument("--buffer", type=int, default=10, 
-                    help="# reference bases to include before and after each repeat")
+                    help="# reference bases to include before and after each repeat (default=10)")
 
     args = parser.parse_args()
+    
+    if args.msa is None or args.repeats is None:
+        parser.print_help()
+        sys.exit()
     
     repeats = pd.read_csv(args.repeats, sep='\t', header=None)
     repeats = repeats.sort_values(by=0, ascending=True)
@@ -34,10 +38,13 @@ def main():
     with open(args.msa, "r") as reader:
         line = reader.readline()
         while line:
-            
+            if "*" in line:
+                line = reader.readline()
+                continue
+                
             line=re.sub("\s+", " ", line).strip()
             parts = line.split(" ")
-            if len(parts) == 2 and parts[1].count("*") < 1:
+            if len(parts) == 2:
                 if parts[0] not in sequence:
                     sequence[parts[0]] = ""
                 sequence[parts[0]] = sequence[parts[0]] + parts[1]
@@ -45,11 +52,15 @@ def main():
             line = reader.readline()
     reader.close()
     
-    pos = 393462 #args.start
+    pos = args.start
     posMap = dict()
     out = args.out + ("/" if args.out[-1] != "/" else "")
+    
+    if not os.path.exists(out):
+        os.mkdir(out)
+    
     outFasta = out + "fastas/"
-                         
+         
     if not os.path.exists(outFasta):
         os.mkdir(outFasta)
 
