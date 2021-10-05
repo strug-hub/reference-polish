@@ -31,4 +31,5 @@ Running the script
 Post analysis
 ------
 
-A multiple sequence alignment (MSA) of the polished regions can be generated. [etc/parse_msa_gaps.py](etc/parse_msa_gaps.py) can be used to count the number of bp captured in a set of regions. Used for quantifying the length of large indels in all the samples.
+A multiple sequence alignment (MSA) of the polished regions can be generated. [etc/parse_msa_gaps.py](etc/parse_msa_gaps.py) can be used to count the number of bp captured in a set of regions. Used for quantifying the length of large indels in all the samples. We used MAFFT and output in Clustal format as input to this script.
+`mafft --auto --clustalout --reorder all.fasta > msa.mafft`
