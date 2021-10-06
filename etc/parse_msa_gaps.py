@@ -4,6 +4,28 @@ import re
 import os
 import sys
 
+from Bio import SeqIO
+import pyfaidx
+
+def read_fasta(fasta, toUpper=False):
+    """
+    Loads fasta (or gzipped fasta) file into memory with SeqIO.
+    Returns dictionary of id->sequence.
+    """
+
+    if(fasta[-2:] == "gz"):
+        with gzip.open(fasta, "rt") as handle:
+            records = list(SeqIO.parse(handle, "fasta"))
+    else:
+        records = list(SeqIO.parse(fasta, "fasta"))
+
+    def get_str(seq):
+        return str(seq).upper() if toUpper else str(seq)
+    
+    faDict = dict(zip([str(r.id) for r in records], [get_str(r.seq) for r in records]))
+    return faDict
+
+
 def main():
     
     parser = argparse.ArgumentParser(description="Get repeat info from MSA")
@@ -22,7 +44,9 @@ def main():
                     help="Reference position for the first base in the MSA file (default=0)")
     parser.add_argument("--buffer", type=int, default=10, 
                     help="# reference bases to include before and after each repeat (default=10)")
-
+    parser.add_argument("--samplefasta", type=str, default=None,
+                         help="Extract and use sample names from this FASTA (because CLUSTAL format trims IDs)")
+    
     args = parser.parse_args()
     
     if args.msa is None or args.repeats is None:
@@ -50,8 +74,23 @@ def main():
                 sequence[parts[0]] = sequence[parts[0]] + parts[1]
         
             line = reader.readline()
-    reader.close()
-    
+
+    if args.samplefasta is not None:
+        fasta = read_fasta(args.samplefasta)
+        
+        clustalKey=list(sequence.keys())
+        newKey=list(fasta.keys())
+        newSequence = {}
+        for key in clustalKey:
+            betterKey = [k for k in newKey if key in k]
+            if len(betterKey) != 1:
+                print("ERROR: Could not match CLUSTAL id " + key + " uniquely to FASTA ID.")
+                print("Possible options found: ", betterKey)
+                exit()
+            newSequence[betterKey[0]] = sequence[key]
+        
+        sequence=newSequence
+
     pos = args.start
     posMap = dict()
     out = args.out + ("/" if args.out[-1] != "/" else "")
@@ -64,11 +103,15 @@ def main():
     if not os.path.exists(outFasta):
         os.mkdir(outFasta)
 
+    if ref not in sequence:
+        print("ERROR: Could not find reference ID " + ref + " in CLUSTAL file. Was it truncated?")
+        print("IDs from CLUSTAL file: ", list(sequence.keys()))
+        exit()
+                
     for i,char in enumerate(sequence[ref]):
         if char != "-":
             posMap[pos] = i
             pos += 1
-    
     
     samples = [sample for sample in sequence]
     samples.remove(ref) ; samples = sorted(samples)
