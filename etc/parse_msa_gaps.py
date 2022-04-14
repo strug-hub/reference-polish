@@ -82,7 +82,7 @@ def main():
         newKey=list(fasta.keys())
         newSequence = {}
         for key in clustalKey:
-            betterKey = [k for k in newKey if key in k]
+            betterKey = [k for k in newKey if key.startswith(k)]
             if len(betterKey) != 1:
                 print("ERROR: Could not match CLUSTAL id " + key + " uniquely to FASTA ID.")
                 print("Possible options found: ", betterKey)
