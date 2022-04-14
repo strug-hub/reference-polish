@@ -3,6 +3,7 @@ import pandas as pd
 import re
 import os
 import sys
+import gzip
 
 from Bio import SeqIO
 import pyfaidx
