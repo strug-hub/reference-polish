@@ -3,7 +3,6 @@ import pandas as pd
 import re
 import os
 import sys
-import gzip
 
 from Bio import SeqIO
 import pyfaidx
@@ -83,7 +82,7 @@ def main():
         newKey=list(fasta.keys())
         newSequence = {}
         for key in clustalKey:
-            betterKey = [k for k in newKey if key.startswith(k)]
+            betterKey = [k for k in newKey if key in k]
             if len(betterKey) != 1:
                 print("ERROR: Could not match CLUSTAL id " + key + " uniquely to FASTA ID.")
                 print("Possible options found: ", betterKey)
@@ -124,6 +123,7 @@ def main():
     countWriter.write("start\tend\t" + "\t".join(samples) + "\n")
     
     for i,row in repeats.iterrows():
+        print(row)
         s = row[0] - buffer
         e = row[1] + buffer
         name = str(s) + "_" + str(e)
